@@ -1,0 +1,23 @@
+{
+  "name": "api-pollapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Andres0919/api-pollapp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Andres0919/api-pollapp/issues"
+  },
+  "homepage": "https://github.com/Andres0919/api-pollapp#readme",
+  "devDependencies": {
+    "typescript": "^4.8.3"
+  }
+}

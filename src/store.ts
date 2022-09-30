@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
+import { DB_URI } from "./config";
 
 export async function databaseInit() {
-  const db = await mongoose.connect(
-    "mongodb://mongo:Cx2riMpB2WummrIn401U@containers-us-west-24.railway.app:6705"
-  );
+  const db = await mongoose.connect(DB_URI);
 
   console.log("database is connected to :>> ", db.connection.db.databaseName);
 }

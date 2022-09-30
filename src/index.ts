@@ -1,11 +1,22 @@
+import * as dotenv from "dotenv";
+dotenv.config();
 import Fastify, { FastifyInstance } from "fastify";
 
 import { databaseInit } from "./store";
 import routes from "./api";
+import { User } from "./api/users/model";
 
 const server: FastifyInstance = Fastify({
   logger: true,
 });
+
+declare module "fastify" {
+  interface FastifyRequest {
+    auth: {
+      user: User;
+    };
+  }
+}
 
 const start = async () => {
   try {

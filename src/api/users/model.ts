@@ -5,8 +5,8 @@ import { getModelForClass, ModelOptions, prop } from "@typegoose/typegoose";
     timestamps: true,
   },
 })
-class User {
-  @prop()
+export class User {
+  @prop({ default: null })
   firstname: string;
 
   @prop()

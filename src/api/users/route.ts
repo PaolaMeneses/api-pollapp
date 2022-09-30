@@ -1,8 +1,4 @@
-import {
-  FastifyPluginCallback,
-  // RouteOptions,
-  RouteShorthandOptions,
-} from "fastify";
+import { FastifyPluginCallback, RouteShorthandOptions } from "fastify";
 import { getUsers as _getUsers, registryUser } from "./service";
 
 const opts: RouteShorthandOptions = {

@@ -1,4 +1,6 @@
 import { FastifyPluginCallback, RouteOptions } from "fastify";
+
+import { verifyToken } from "./../../middlewares";
 import { getGroupList, requestCreateGroup } from "./service";
 
 // const opts: RouteShorthandOptions = {
@@ -9,7 +11,12 @@ const routes: RouteOptions[] = [
   {
     url: "/",
     method: "GET",
-    handler: getGroupList,
+    handler: async (_request) => {
+      const data = await getGroupList();
+
+      return { data };
+    },
+    preHandler: [verifyToken],
   },
   {
     url: "/",

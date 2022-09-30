@@ -1,4 +1,5 @@
 import { FastifyPluginCallback } from "fastify";
+import authRoutes from "./auth/route";
 import boardRoutes from "./boards/route";
 import groupRoutes from "./groups/route";
 import matchRoutes from "./matches/route";
@@ -7,6 +8,7 @@ import teamRoutes from "./teams/route";
 import userRoute from "./users/route";
 
 const routes: FastifyPluginCallback = (fastify, _opts, done) => {
+  fastify.register(authRoutes, { prefix: "/api/auth" });
   fastify.register(userRoute, { prefix: "/api/users" });
   fastify.register(groupRoutes, { prefix: "/api/groups" });
   fastify.register(boardRoutes, { prefix: "/api/boards" });

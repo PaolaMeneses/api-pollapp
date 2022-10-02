@@ -1,5 +1,5 @@
 import { FastifyPluginCallback, RouteOptions } from "fastify";
-import { getMatchList, createMatch } from "./service";
+import { getMatchList, createMatch, createMatchMaster } from "./service";
 
 // const opts: RouteShorthandOptions = {
 //   schema: {},
@@ -15,6 +15,11 @@ const routes: RouteOptions[] = [
     url: "/",
     method: "POST",
     handler: createMatch,
+  },
+  {
+    url: "/seeder",
+    method: "POST",
+    handler: createMatchMaster,
   },
 ];
 

@@ -1,7 +1,7 @@
-import MatchModel from "./model";
+import PredictionModel from "./model";
 
 export const getAllPredictionsByBoard = async () => {
-  const prediction = await MatchModel.aggregate([
+  const prediction = await PredictionModel.aggregate([
     {
       $lookup: {
         from: "users",
@@ -22,7 +22,7 @@ export const getAllPredictionsByBoard = async () => {
 };
 
 export const addPredictionInBoard = async () => {
-  const prediction = new MatchModel({
+  const prediction = new PredictionModel({
     name: "Grupo Familia",
     owner: "6333644586437f2045d9aee4",
     isActive: false,

@@ -1,6 +1,8 @@
 import { FastifyPluginCallback, RouteOptions } from "fastify";
+import { User } from "../users/model";
 
 import { verifyToken } from "./../../middlewares";
+import { Group } from "./model";
 import { getGroupList, requestCreateGroup } from "./service";
 
 // const opts: RouteShorthandOptions = {
@@ -11,7 +13,7 @@ const routes: RouteOptions[] = [
   {
     url: "/",
     method: "GET",
-    handler: async (_request) => {
+    handler: async () => {
       const data = await getGroupList();
 
       return { data };
@@ -21,7 +23,15 @@ const routes: RouteOptions[] = [
   {
     url: "/",
     method: "POST",
-    handler: requestCreateGroup,
+    handler: async (request) => {
+      const data = await requestCreateGroup(
+        request.body as Group,
+        request.auth as { user: User }
+      );
+
+      return { data };
+    },
+    preHandler: [verifyToken],
   },
 ];
 

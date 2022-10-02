@@ -1,14 +1,14 @@
-import { getModelForClass, prop } from "@typegoose/typegoose";
-import mongoose from "mongoose";
+import { getModelForClass, prop, Ref } from "@typegoose/typegoose";
+import { User } from "../users/model";
 
-class Group {
+export class Group {
   @prop()
   name: string;
 
-  @prop()
-  owner: mongoose.Types.ObjectId;
+  @prop({ ref: () => User })
+  owner: Ref<User>;
 
-  @prop()
+  @prop({ default: false })
   isActive: boolean;
 
   @prop()

@@ -1,5 +1,5 @@
 import { FastifyPluginCallback, RouteOptions } from "fastify";
-import { getTeamList, createTeam } from "./service";
+import { getTeamList, createTeam, createTeamMaster } from "./service";
 
 // const opts: RouteShorthandOptions = {
 //   schema: {},
@@ -15,6 +15,11 @@ const routes: RouteOptions[] = [
     url: "/",
     method: "POST",
     handler: createTeam,
+  },
+  {
+    url: "/seeder",
+    method: "POST",
+    handler: createTeamMaster,
   },
 ];
 

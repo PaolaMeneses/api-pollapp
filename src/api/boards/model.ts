@@ -1,23 +1,26 @@
-import { getModelForClass, prop } from "@typegoose/typegoose";
-import mongoose from "mongoose";
+import { getModelForClass, plugin, prop, Ref } from "@typegoose/typegoose";
+import { AutoIncrementID } from "@typegoose/auto-increment";
+import { Group } from "../groups/model";
+import { User } from "../users/model";
 
-class Board {
-  @prop()
-  user_id: mongoose.Types.ObjectId;
+@plugin(AutoIncrementID, { field: "number", startAt: 1000 })
+export class Board {
+  @prop({ ref: () => User, required: true })
+  user_id: Ref<User>;
 
-  @prop()
-  group_id: mongoose.Types.ObjectId;
+  @prop({ ref: () => Group, required: true })
+  group_id: Ref<Group>;
 
   @prop()
   number: number;
 
-  @prop()
+  @prop({ default: null })
   current_pos: number;
 
-  @prop()
+  @prop({ default: null })
   previous_pos: number;
 
-  @prop()
+  @prop({ default: false })
   isActive: boolean;
 }
 

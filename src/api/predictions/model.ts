@@ -1,28 +1,22 @@
 import { getModelForClass, prop } from "@typegoose/typegoose";
 import mongoose from "mongoose";
 
-class Match {
+class Prediction {
   @prop()
-  localTeam_id: mongoose.Types.ObjectId;
+  board_id: mongoose.Types.ObjectId;
 
   @prop()
-  visitorTeam_id: mongoose.Types.ObjectId;
+  match_id: mongoose.Types.ObjectId;
 
   @prop()
-  localGoals: number;
+  localGoalPrediction: number;
 
   @prop()
-  visitorGoals: number;
+  visitorGoalPrediction: number;
 
   @prop()
-  localGeneralGoals: number;
-
-  @prop()
-  visitorGeneralGoals: number;
-
-  @prop()
-  date: Date;
+  points: number;
 }
 
-const MatchModel = getModelForClass(Match);
-export default MatchModel;
+const PredictionModel = getModelForClass(Prediction);
+export default PredictionModel;

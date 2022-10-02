@@ -1,22 +1,40 @@
-import { getModelForClass, prop } from "@typegoose/typegoose";
-import mongoose from "mongoose";
+import { getModelForClass, prop, Ref } from "@typegoose/typegoose";
+import { Team } from "../teams/model";
 
-class Prediction {
-  @prop()
-  board_id: mongoose.Types.ObjectId;
+class Match {
+  @prop({ ref: () => Team })
+  localTeam_id: Ref<Team>;
+
+  @prop({ ref: () => Team })
+  visitorTeam_id: Ref<Team>;
+
+  @prop({ default: null })
+  localGoals: number;
+
+  @prop({ default: null })
+  visitorGoals: number;
+
+  @prop({ default: null })
+  localGeneralGoals: number;
+
+  @prop({ default: null })
+  visitorGeneralGoals: number;
 
   @prop()
-  match_id: mongoose.Types.ObjectId;
+  date: Date;
 
   @prop()
-  localGoalPrediction: number;
+  isActive: boolean;
 
   @prop()
-  visitorGoalPrediction: number;
+  isClosed: boolean;
 
   @prop()
-  points: number;
+  phase: string;
+
+  @prop()
+  matchNumber: number;
 }
 
-const MatchModel = getModelForClass(Prediction);
+const MatchModel = getModelForClass(Match);
 export default MatchModel;

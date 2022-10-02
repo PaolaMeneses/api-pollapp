@@ -1,7 +1,7 @@
-import Group from "./model";
+import GroupModel, { Group } from "./model";
 
 export const getGroups = async () => {
-  const group = await Group.aggregate([
+  const group = await GroupModel.aggregate([
     {
       $lookup: {
         from: "users",
@@ -21,13 +21,8 @@ export const getGroups = async () => {
   return group;
 };
 
-export const createGroup = async () => {
-  const group = new Group({
-    name: "Grupo Familia",
-    owner: "6333644586437f2045d9aee4",
-    isActive: false,
-    code: "AXc12112",
-  });
+export const createGroup = async (newGroup: Group) => {
+  const group = new GroupModel(newGroup);
   await group.save();
   console.log({ group });
   return group;

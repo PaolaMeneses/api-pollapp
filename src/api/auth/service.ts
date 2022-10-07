@@ -39,6 +39,7 @@ export const registerUser = async (newUser: User) => {
 
   const password = await hashText(newUser.password);
 
-  const user = await createUser({ ...newUser, password });
-  return user;
+  await createUser({ ...newUser, password });
+  const auth = await login({ ...newUser });
+  return auth;
 };

@@ -3,7 +3,11 @@ import { User } from "../users/model";
 
 import { verifyToken } from "./../../middlewares";
 import { Group } from "./model";
-import { getGroupList, requestCreateGroup } from "./service";
+import {
+  getCurrentGroupListOrByCode,
+  getGroupList,
+  requestCreateGroup,
+} from "./service";
 
 // const opts: RouteShorthandOptions = {
 //   schema: {},
@@ -13,16 +17,30 @@ const routes: RouteOptions[] = [
   {
     url: "/",
     method: "GET",
+    preHandler: [verifyToken],
     handler: async () => {
       const data = await getGroupList();
 
       return { data };
     },
+  },
+  {
+    url: "/search",
+    method: "GET",
     preHandler: [verifyToken],
+    handler: async (request) => {
+      const data = await getCurrentGroupListOrByCode(
+        request.query as { code?: string },
+        request.auth as { user: User }
+      );
+
+      return { data };
+    },
   },
   {
     url: "/",
     method: "POST",
+    preHandler: [verifyToken],
     handler: async (request) => {
       const data = await requestCreateGroup(
         request.body as Group,
@@ -31,7 +49,6 @@ const routes: RouteOptions[] = [
 
       return { data };
     },
-    preHandler: [verifyToken],
   },
 ];
 

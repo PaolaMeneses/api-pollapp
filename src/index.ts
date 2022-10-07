@@ -1,7 +1,7 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 import Fastify, { FastifyInstance } from "fastify";
-
+import cors from "@fastify/cors";
 import { databaseInit } from "./store";
 import routes from "./api";
 import { User } from "./api/users/model";
@@ -20,6 +20,7 @@ declare module "fastify" {
 
 const start = async () => {
   try {
+    await server.register(cors, {});
     await databaseInit();
     server.register(routes);
     await server.listen({ port: 3000, host: "0.0.0.0" });

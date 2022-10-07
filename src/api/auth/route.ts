@@ -1,3 +1,4 @@
+import { verifyToken } from "./../../middlewares";
 import { FastifyPluginCallback, RouteOptions } from "fastify";
 import { User } from "../users/model";
 import { login, registerUser } from "./service";
@@ -7,6 +8,15 @@ import { login, registerUser } from "./service";
 // };
 
 const routes: RouteOptions[] = [
+  {
+    url: "/current_user",
+    method: "GET",
+    preHandler: [verifyToken],
+    handler: async (request) => {
+      const data = request.auth.user;
+      return { data };
+    },
+  },
   {
     url: "/login",
     method: "POST",

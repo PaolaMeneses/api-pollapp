@@ -6,6 +6,8 @@ import { getModelForClass, ModelOptions, prop } from "@typegoose/typegoose";
   },
 })
 export class User {
+  _id: string;
+
   @prop({ default: null })
   firstname: string;
 

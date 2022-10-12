@@ -5,6 +5,7 @@ import { verifyToken } from "./../../middlewares";
 import { Group } from "./model";
 import {
   getCurrentGroupListOrByCode,
+  getGroupById,
   getGroupList,
   requestCreateGroup,
 } from "./service";
@@ -31,6 +32,19 @@ const routes: RouteOptions[] = [
     handler: async (request) => {
       const data = await getCurrentGroupListOrByCode(
         request.query as { code?: string },
+        request.auth as { user: User }
+      );
+
+      return { data };
+    },
+  },
+  {
+    url: "/:groupId",
+    method: "GET",
+    preHandler: [verifyToken],
+    handler: async (request) => {
+      const data = await getGroupById(
+        request.params as { groupId: string },
         request.auth as { user: User }
       );
 

@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import PredictionModel from "./model";
 
 export const getAllPredictionsByBoard = async () => {
@@ -30,5 +31,29 @@ export const addPredictionInBoard = async () => {
   });
   await prediction.save();
   console.log({ prediction });
+  return prediction;
+};
+
+export const updatePredictionById = async (
+  predictId: string,
+  {
+    localGoalPrediction,
+    visitorGoalPrediction,
+  }: {
+    localGoalPrediction: number;
+    visitorGoalPrediction: number;
+  }
+) => {
+  const prediction = await PredictionModel.findOneAndUpdate(
+    { _id: new mongoose.Types.ObjectId(predictId) },
+    {
+      localGoalPrediction,
+      visitorGoalPrediction,
+    },
+    {
+      new: true,
+    }
+  );
+
   return prediction;
 };

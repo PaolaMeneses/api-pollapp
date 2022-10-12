@@ -1,7 +1,9 @@
 import { getModelForClass, prop, Ref } from "@typegoose/typegoose";
 import { Team } from "../teams/model";
 
-class Match {
+export class Match {
+  _id: string;
+
   @prop({ ref: () => Team })
   localTeam_id: Ref<Team>;
 

@@ -2,6 +2,8 @@ import { getModelForClass, prop, Ref } from "@typegoose/typegoose";
 import { User } from "../users/model";
 
 export class Group {
+  _id: string;
+
   @prop()
   name: string;
 

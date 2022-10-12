@@ -3,10 +3,22 @@ import {
   getBoardsByUserAndGroup,
   addBoardInGroup,
   activateBoardById,
+  getBoardWithPredsByBoardId,
+  getBoardByBoardId,
 } from "./store";
 
 export const getCurrentUserBoardsByGroup = async () => {
   return await getBoardsByUserAndGroup();
+};
+
+export const getBoardWithPreds = async (boardId: string) => {
+  const board = await getBoardWithPredsByBoardId(boardId);
+  return board;
+};
+
+export const getBoardActiveIfExistByBoardId = async (boardId: string) => {
+  const board = await getBoardByBoardId(boardId);
+  return board;
 };
 
 export const createBoardInGroup = async (newBoard: Board) => {

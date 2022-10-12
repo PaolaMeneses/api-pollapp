@@ -622,24 +622,26 @@ export const matchSeeder = async () => {
     },
   ];
 
-  for (const match of matches) {
-    const matchFound = await MatchModel.findOne({
-      matchNumber: match.matchNumber,
-    });
+  await Promise.all(
+    matches.map(async (match) => {
+      const matchFound = await MatchModel.findOne({
+        matchNumber: match.matchNumber,
+      });
 
-    if (!matchFound) {
-      const localTeam_id = await TeamModel.findOne({
-        name: match.localTeam_id,
-      });
-      const visitorTeam_id = await TeamModel.findOne({
-        name: match.visitorTeam_id,
-      });
-      const newMatch = new MatchModel({
-        ...match,
-        localTeam_id,
-        visitorTeam_id,
-      });
-      await newMatch.save();
-    }
-  }
+      if (!matchFound) {
+        const localTeam_id = await TeamModel.findOne({
+          name: match.localTeam_id,
+        });
+        const visitorTeam_id = await TeamModel.findOne({
+          name: match.visitorTeam_id,
+        });
+        const newMatch = new MatchModel({
+          ...match,
+          localTeam_id,
+          visitorTeam_id,
+        });
+        await newMatch.save();
+      }
+    })
+  );
 };

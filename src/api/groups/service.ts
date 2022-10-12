@@ -6,6 +6,7 @@ import {
   createGroup,
   findGroupListByCode,
   findGroupListByUser,
+  findGroupListById,
 } from "./store";
 
 export const getGroupList = async () => {
@@ -19,6 +20,18 @@ export const requestCreateGroup = async (
   const code = nano.nanoid(6);
   const group = await createGroup({ ...newGroup, owner: auth.user, code });
   return { group };
+};
+
+export const getGroupById = async (
+  {
+    groupId,
+  }: {
+    groupId: string;
+  },
+  { user }: { user: User }
+) => {
+  const group = await findGroupListById(groupId, user);
+  return group;
 };
 
 export const getCurrentGroupListOrByCode = async (

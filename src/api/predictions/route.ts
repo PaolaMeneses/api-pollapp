@@ -2,6 +2,7 @@ import { FastifyPluginCallback, RouteOptions } from "fastify";
 import {
   getUserAuthPredictionListByBoard,
   createPredictioInBoard,
+  updatePredictById,
 } from "./service";
 
 // const opts: RouteShorthandOptions = {
@@ -18,6 +19,21 @@ const routes: RouteOptions[] = [
     url: "/",
     method: "POST",
     handler: createPredictioInBoard,
+  },
+  {
+    url: "/:predictId",
+    method: "PATCH",
+    handler: async (request) => {
+      const { predictId } = request.params as { predictId: string };
+      const newPrediction = request.body as {
+        localGoalPrediction: number;
+        visitorGoalPrediction: number;
+      };
+
+      const data = await updatePredictById(predictId, newPrediction);
+
+      return { data };
+    },
   },
 ];
 

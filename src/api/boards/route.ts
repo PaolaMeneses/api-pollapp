@@ -5,6 +5,8 @@ import {
   getCurrentUserBoardsByGroup,
   createBoardInGroup,
   activateBoard,
+  getBoardWithPreds,
+  getBoardActiveIfExistByBoardId,
 } from "./service";
 
 // const opts: RouteShorthandOptions = {
@@ -18,11 +20,33 @@ const routes: RouteOptions[] = [
     handler: getCurrentUserBoardsByGroup,
   },
   {
+    url: "/:boardId/matches/active",
+    method: "GET",
+    preHandler: [verifyToken],
+    handler: async (request) => {
+      const { boardId } = request.params as { boardId: string };
+      const data = await getBoardWithPreds(boardId);
+      return { data };
+    },
+  },
+  {
+    url: "/:boardId",
+    method: "GET",
+    preHandler: [verifyToken],
+    handler: async (request) => {
+      const { boardId } = request.params as { boardId: string };
+
+      const data = await getBoardActiveIfExistByBoardId(boardId);
+      return { data };
+    },
+  },
+  {
     url: "/",
     method: "POST",
     preHandler: [verifyToken],
     handler: async (request) => {
-      const data = await createBoardInGroup(request.body as Board);
+      const board = request.body as Board;
+      const data = await createBoardInGroup(board);
       return { data };
     },
   },

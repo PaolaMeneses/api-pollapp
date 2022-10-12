@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
-// import createHttpError from "http-errors";
 import createHttpError from "http-errors";
-import { ClientSession } from "mongoose";
-import PredictionModel from "../predictions/model";
 import BoardModel, { Board } from "./model";
+import { Match } from "./../matches/model";
+import MatchModel from "../matches/model";
+import PredictionModel from "../predictions/model";
 
 export const getBoardsByUserAndGroup = async () => {
   const board = await BoardModel.aggregate([
@@ -26,60 +26,173 @@ export const getBoardsByUserAndGroup = async () => {
   return board;
 };
 
+export const getBoardByBoardId = async (boardId: string) => {
+  return BoardModel.findOne({
+    _id: boardId,
+    isActive: true,
+  });
+};
+
+export const getBoardWithPredsByBoardId = async (boardId: string) => {
+  const board = await BoardModel.aggregate([
+    {
+      $match: { _id: new mongoose.Types.ObjectId(boardId) },
+    },
+    {
+      $lookup: {
+        from: "predictions",
+        localField: "_id",
+        foreignField: "board_id",
+        as: "predictions",
+      },
+    },
+    {
+      $unwind: {
+        path: "$predictions",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: "matches",
+        localField: "predictions.match_id",
+        foreignField: "_id",
+        as: "predictions.match",
+      },
+    },
+    {
+      $unwind: {
+        path: "$predictions.match",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $match: {
+        $and: [
+          { "predictions.match.isActive": true },
+          {
+            "predictions.match.isClosed": false,
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: "teams",
+        localField: "predictions.match.localTeam_id",
+        foreignField: "_id",
+        as: "predictions.match.localTeam",
+      },
+    },
+    {
+      $lookup: {
+        from: "teams",
+        localField: "predictions.match.visitorTeam_id",
+        foreignField: "_id",
+        as: "predictions.match.visitorTeam",
+      },
+    },
+    {
+      $unwind: {
+        path: "$predictions.match.localTeam",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $unwind: {
+        path: "$predictions.match.visitorTeam",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    { $sort: { "predictions.match.matchNumber": 1 } },
+    {
+      $group: {
+        _id: "$_id",
+        current_pos: { $first: "$current_pos" },
+        previous_pos: { $first: "$previous_pos" },
+        number: { $first: "$number" },
+        predictions: { $push: "$predictions" },
+      },
+    },
+
+    {
+      $project: {
+        _id: 1,
+        current_pos: 1,
+        previous_pos: 1,
+        number: 1,
+        predictions: {
+          _id: 1,
+          localGoalPrediction: 1,
+          visitorGoalPrediction: 1,
+          points: 1,
+          match: {
+            _id: 1,
+            localGoals: 1,
+            visitorGoals: 1,
+            localGeneralGoals: 1,
+            visitorGeneralGoals: 1,
+            date: 1,
+            isActive: 1,
+            isClosed: 1,
+            phase: 1,
+            matchNumber: 1,
+            localTeam: {
+              _id: 1,
+              name: 1,
+              flag: 1,
+            },
+            visitorTeam: {
+              _id: 1,
+              name: 1,
+              flag: 1,
+            },
+          },
+        },
+      },
+    },
+  ]);
+  const [firstBoard] = board;
+  return firstBoard;
+};
+
 export const addBoardInGroup = async (newBoard: Board) => {
   const board = new BoardModel(newBoard);
   await board.save();
   return board;
 };
 
-export const activateBoardById = async (_boardId: string) => {
-  // new Promise(async (resolve, reject) => {
-  let session: ClientSession | undefined;
+export const activateBoardById = async (boardId: string) => {
   try {
-    await BoardModel.createCollection();
-    await PredictionModel.createCollection();
-    session = await mongoose.startSession();
-    session.startTransaction();
-    const board = await BoardModel.updateOne(
+    const board = await BoardModel.findByIdAndUpdate(
+      boardId,
       {
-        user_id: "6334c7c237da190f55426550",
-        group_id: "633724157b52147484b2786a",
-      },
-      {
-        previous_pos: 11,
+        isActive: true,
       },
       {
         new: true,
-        session,
       }
     );
-    console.log("board :>> ", board);
-    // await board.update();
-    // const board = await BoardModel.findByIdAndUpdate(
-    //   boardId,
-    //   {
-    //     $set: {
-    //       isActive: true,
-    //     },
-    //   },
-    //   {
-    //     session,
-    //     new: true,
-    //   }
-    // );
 
-    const preds = await PredictionModel.create(
-      { group_id: "633723183c8c03f85d6f99ce", localGeneralGoals: 1 },
-      { session }
+    const matches: Match[] = await MatchModel.find({}, null);
+    await Promise.all(
+      matches.map(async (match) => {
+        const predFound = await PredictionModel.findOne({
+          board_id: new mongoose.Types.ObjectId(boardId),
+          match_id: new mongoose.Types.ObjectId(match._id),
+        });
+        if (!predFound) {
+          await PredictionModel.create({
+            board_id: board,
+            match_id: match,
+          });
+        }
+      })
     );
-    console.log("preds :>> ", preds);
-    session.endSession();
-    await session.commitTransaction();
+
     return board;
   } catch (error) {
     console.log("error.message :>> ", (error as Error).message);
-    session?.abortTransaction();
     throw new createHttpError.BadRequest("Error activando tabla");
-  } finally {
   }
 };

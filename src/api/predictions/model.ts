@@ -1,20 +1,21 @@
-import { getModelForClass, prop } from "@typegoose/typegoose";
-import mongoose from "mongoose";
+import { getModelForClass, prop, Ref } from "@typegoose/typegoose";
+import { Board } from "../boards/model";
+import { Match } from "../matches/model";
 
 class Prediction {
-  @prop()
-  board_id: mongoose.Types.ObjectId;
+  @prop({ ref: () => Board })
+  board_id: Ref<Board>;
 
-  @prop()
-  match_id: mongoose.Types.ObjectId;
+  @prop({ ref: () => Match })
+  match_id: Ref<Match>;
 
-  @prop()
+  @prop({ default: null })
   localGoalPrediction: number;
 
-  @prop()
+  @prop({ default: null })
   visitorGoalPrediction: number;
 
-  @prop()
+  @prop({ default: 0 })
   points: number;
 }
 

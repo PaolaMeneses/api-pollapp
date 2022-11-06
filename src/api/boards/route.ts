@@ -7,6 +7,7 @@ import {
   activateBoard,
   getBoardWithPreds,
   getBoardActiveIfExistByBoardId,
+  getBoardWithPreviousPreds,
 } from "./service";
 
 // const opts: RouteShorthandOptions = {
@@ -26,6 +27,16 @@ const routes: RouteOptions[] = [
     handler: async (request) => {
       const { boardId } = request.params as { boardId: string };
       const data = await getBoardWithPreds(boardId);
+      return { data };
+    },
+  },
+  {
+    url: "/:boardId/matches/closed",
+    method: "GET",
+    preHandler: [verifyToken],
+    handler: async (request) => {
+      const { boardId } = request.params as { boardId: string };
+      const data = await getBoardWithPreviousPreds(boardId);
       return { data };
     },
   },

@@ -1,32 +1,89 @@
 import mongoose from "mongoose";
+import BoardModel from "../boards/model";
 import { User } from "../users/model";
 import GroupModel, { Group } from "./model";
 
-export const getGroups = async () => {
-  const group = await GroupModel.aggregate([
+export const getAllGroups = async () => {
+  const groups = await GroupModel.aggregate([
     {
       $lookup: {
-        from: "users",
-        localField: "owner",
-        foreignField: "_id",
-        as: "owner",
+        from: "boards",
+        localField: "_id",
+        foreignField: "group_id",
+        as: "boards",
       },
     },
     {
-      $unwind: "$owner",
+      $unwind: {
+        path: "$boards",
+        preserveNullAndEmptyArrays: true,
+      },
     },
     {
-      $match: { code: "AXc12112" },
+      $lookup: {
+        from: "users",
+        localField: "boards.user_id",
+        foreignField: "_id",
+        as: "boards.user",
+      },
+    },
+    {
+      $unwind: {
+        path: "$boards.user",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    { $unset: "boards.user.password" },
+    {
+      $group: {
+        _id: "$_id",
+        code: { $first: "$code" },
+        name: { $first: "$name" },
+        boards: { $push: "$boards" },
+      },
+    },
+    {
+      $project: {
+        name: 1,
+        code: 1,
+        pending: {
+          $filter: {
+            input: "$boards",
+            as: "boards",
+            cond: { $eq: ["$$boards.isActive", false] },
+          },
+        },
+      },
     },
   ]);
-  console.log({ group });
-  return group;
+  return groups;
+};
+
+export const getBoardPositionsByGroupId = async (boardId: string) => {
+  const boards = await BoardModel.aggregate([
+    {
+      $match: { group_id: new mongoose.Types.ObjectId(boardId) },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "user_id",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    {
+      $unwind: "$user",
+    },
+    { $unset: "user.password" },
+  ]);
+
+  return boards;
 };
 
 export const createGroup = async (newGroup: Group) => {
   const group = new GroupModel(newGroup);
   await group.save();
-  console.log({ group });
   return group;
 };
 

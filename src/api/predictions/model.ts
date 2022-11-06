@@ -2,7 +2,9 @@ import { getModelForClass, prop, Ref } from "@typegoose/typegoose";
 import { Board } from "../boards/model";
 import { Match } from "../matches/model";
 
-class Prediction {
+export class Prediction {
+  _id: string;
+
   @prop({ ref: () => Board })
   board_id: Ref<Board>;
 

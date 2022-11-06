@@ -7,6 +7,7 @@ import {
   getCurrentGroupListOrByCode,
   getGroupById,
   getGroupList,
+  getPositionBysGroupId,
   requestCreateGroup,
 } from "./service";
 
@@ -33,6 +34,18 @@ const routes: RouteOptions[] = [
       const data = await getCurrentGroupListOrByCode(
         request.query as { code?: string },
         request.auth as { user: User }
+      );
+
+      return { data };
+    },
+  },
+  {
+    url: "/:groupId/positions",
+    method: "GET",
+    preHandler: [verifyToken],
+    handler: async (request) => {
+      const data = await getPositionBysGroupId(
+        request.params as { groupId: string }
       );
 
       return { data };

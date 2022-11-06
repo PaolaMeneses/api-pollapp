@@ -1,25 +1,149 @@
+import mongoose from "mongoose";
+import BoardModel, { Board } from "../boards/model";
+import GroupModel from "../groups/model";
+import PredictionModel, { Prediction } from "../predictions/model";
 import TeamModel from "../teams/model";
-import MatchModel from "./model";
+import MatchModel, { Match } from "./model";
 
 export const getMatchWithTeams = async () => {
-  const match = await MatchModel.aggregate([
+  const matches = await MatchModel.aggregate([
     {
-      $lookup: {
-        from: "users",
-        localField: "owner",
-        foreignField: "_id",
-        as: "owner",
+      $match: {
+        $and: [
+          {
+            isActive: true,
+          },
+          {
+            isClosed: false,
+          },
+        ],
       },
     },
     {
-      $unwind: "$owner",
+      $lookup: {
+        from: "teams",
+        localField: "localTeam_id",
+        foreignField: "_id",
+        as: "localTeam",
+      },
     },
     {
-      $match: { code: "AXc12112" },
+      $lookup: {
+        from: "teams",
+        localField: "visitorTeam_id",
+        foreignField: "_id",
+        as: "visitorTeam",
+      },
+    },
+    {
+      $unwind: {
+        path: "$localTeam",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $unwind: {
+        path: "$visitorTeam",
+        preserveNullAndEmptyArrays: true,
+      },
     },
   ]);
-  console.log({ match });
+  return matches;
+};
+
+export const findMatchByIdWithTeams = async (matchId: string) => {
+  const matches = await MatchModel.aggregate([
+    {
+      $match: {
+        $and: [
+          {
+            _id: new mongoose.Types.ObjectId(matchId),
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: "teams",
+        localField: "localTeam_id",
+        foreignField: "_id",
+        as: "localTeam",
+      },
+    },
+    {
+      $lookup: {
+        from: "teams",
+        localField: "visitorTeam_id",
+        foreignField: "_id",
+        as: "visitorTeam",
+      },
+    },
+    {
+      $unwind: {
+        path: "$localTeam",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $unwind: {
+        path: "$visitorTeam",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+  ]);
+  const match = matches?.[0] || {};
+
   return match;
+};
+
+export const getPredictionsByMatchId = async (
+  matchId: string,
+  groupId: string
+) => {
+  const predictions = await PredictionModel.aggregate([
+    {
+      $match: {
+        match_id: new mongoose.Types.ObjectId(matchId),
+      },
+    },
+    {
+      $lookup: {
+        from: "boards",
+        localField: "board_id",
+        foreignField: "_id",
+        as: "board",
+      },
+    },
+    {
+      $match: {
+        "board.group_id": new mongoose.Types.ObjectId(groupId),
+      },
+    },
+    {
+      $unwind: {
+        path: "$board",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "board.user_id",
+        foreignField: "_id",
+        as: "board.user",
+      },
+    },
+    {
+      $unset: "board.user.password",
+    },
+    {
+      $unwind: {
+        path: "$board.user",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+  ]);
+  return predictions;
 };
 
 export const addMatch = async () => {
@@ -623,25 +747,196 @@ export const matchSeeder = async () => {
   ];
 
   await Promise.all(
-    matches.map(async (match) => {
-      const matchFound = await MatchModel.findOne({
-        matchNumber: match.matchNumber,
-      });
+    matches.map((match) => {
+      return new Promise<void>(async (resolve) => {
+        const matchFound = await MatchModel.findOne({
+          matchNumber: match.matchNumber,
+        });
 
-      if (!matchFound) {
-        const localTeam_id = await TeamModel.findOne({
-          name: match.localTeam_id,
-        });
-        const visitorTeam_id = await TeamModel.findOne({
-          name: match.visitorTeam_id,
-        });
-        const newMatch = new MatchModel({
-          ...match,
-          localTeam_id,
-          visitorTeam_id,
-        });
-        await newMatch.save();
-      }
+        if (!matchFound) {
+          const localTeam_id = await TeamModel.findOne({
+            name: match.localTeam_id,
+          });
+          const visitorTeam_id = await TeamModel.findOne({
+            name: match.visitorTeam_id,
+          });
+          const newMatch = new MatchModel({
+            ...match,
+            localTeam_id,
+            visitorTeam_id,
+          });
+          await newMatch.save();
+        }
+        resolve();
+      });
     })
   );
+};
+
+export const updateMatchById = async (matchId: string, newMatch: Match) => {
+  const match = await MatchModel.findOneAndUpdate(
+    { _id: new mongoose.Types.ObjectId(matchId) },
+    newMatch,
+    { new: true }
+  );
+
+  const preds: Prediction[] = await PredictionModel.find({
+    match_id: new mongoose.Types.ObjectId(matchId),
+  });
+
+  await Promise.all(
+    preds.map((pred) => {
+      new Promise<void>(async (resolve) => {
+        let points = 0;
+        if (
+          pred.localGoalPrediction !== null &&
+          pred.visitorGoalPrediction !== null
+        ) {
+          const localGoal = Number(match?.localGoals);
+          const visitorGoal = Number(match?.visitorGoals);
+          const localGoalPred = Number(pred.localGoalPrediction);
+          const visitorGoalPred = Number(pred.visitorGoalPrediction);
+
+          if (localGoal === localGoalPred && visitorGoal === visitorGoalPred) {
+            points = 3;
+          } else if (
+            (localGoal > visitorGoal && localGoalPred > visitorGoalPred) ||
+            (localGoal < visitorGoal && localGoalPred < visitorGoalPred) ||
+            (localGoal === visitorGoal && localGoalPred === visitorGoalPred)
+          ) {
+            points = 1;
+          }
+        }
+
+        await PredictionModel.findByIdAndUpdate(pred._id, { points });
+        resolve();
+      });
+    })
+  );
+
+  return {
+    match,
+    preds,
+  };
+};
+
+export const updatePositionByGroup = async () => {
+  const groups = await GroupModel.find({ isActive: true });
+
+  await Promise.all(
+    groups.map((group) => {
+      return new Promise(async (resolve) => {
+        const boards: Board[] = await BoardModel.aggregate([
+          {
+            $match: {
+              $and: [
+                { isActive: true },
+                { group_id: new mongoose.Types.ObjectId(group._id) },
+              ],
+            },
+          },
+          {
+            $lookup: {
+              from: "predictions",
+              localField: "_id",
+              foreignField: "board_id",
+              as: "predictions",
+            },
+          },
+          {
+            $unwind: {
+              path: "$predictions",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $lookup: {
+              from: "matches",
+              localField: "predictions.match_id",
+              foreignField: "_id",
+              as: "predictions.match",
+            },
+          },
+          {
+            $unwind: {
+              path: "$predictions.match",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $match: {
+              $and: [
+                { "predictions.match.isActive": true },
+                {
+                  "predictions.match.isClosed": true,
+                },
+              ],
+            },
+          },
+          {
+            $group: {
+              _id: "$_id",
+              current_pos: { $first: "$current_pos" },
+              previous_pos: { $first: "$previous_pos" },
+              number: { $first: "$number" },
+              totalPoints: { $sum: "$predictions.points" },
+              // predictions: { $push: "$predictions" },
+            },
+          },
+          { $sort: { points: -1 } },
+          // {
+          //   $project: {
+          //     _id: 1,
+          //     current_pos: 1,
+          //     previous_pos: 1,
+          //     number: 1,
+          //     predictions: {
+          //       _id: 1,
+          //       localGoalPrediction: 1,
+          //       visitorGoalPrediction: 1,
+          //       points: 1,
+          //       match: {
+          //         _id: 1,
+          //         localGoals: 1,
+          //         visitorGoals: 1,
+          //         localGeneralGoals: 1,
+          //         visitorGeneralGoals: 1,
+          //         date: 1,
+          //         isActive: 1,
+          //         isClosed: 1,
+          //         phase: 1,
+          //         matchNumber: 1,
+          //         localTeam: {
+          //           _id: 1,
+          //           name: 1,
+          //           flag: 1,
+          //         },
+          //         visitorTeam: {
+          //           _id: 1,
+          //           name: 1,
+          //           flag: 1,
+          //         },
+          //       },
+          //     },
+          //   },
+          // },
+        ]);
+        await Promise.all(
+          boards.map((board, i) => {
+            return new Promise<void>(async (resolve) => {
+              await BoardModel.findByIdAndUpdate(board._id, {
+                totalPoints: board.totalPoints,
+                current_pos: i + 1,
+                previous_pos: board.current_pos,
+              });
+              resolve();
+            });
+          })
+        );
+        resolve(boards);
+      });
+    })
+  );
+
+  return { groups };
 };

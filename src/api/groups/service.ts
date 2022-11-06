@@ -2,15 +2,16 @@ import * as nano from "nanoid";
 import { User } from "./../users/model";
 import { Group } from "./model";
 import {
-  getGroups,
+  getAllGroups,
   createGroup,
   findGroupListByCode,
   findGroupListByUser,
   findGroupListById,
+  getBoardPositionsByGroupId,
 } from "./store";
 
 export const getGroupList = async () => {
-  return await getGroups();
+  return await getAllGroups();
 };
 
 export const requestCreateGroup = async (
@@ -19,7 +20,16 @@ export const requestCreateGroup = async (
 ) => {
   const code = nano.nanoid(6);
   const group = await createGroup({ ...newGroup, owner: auth.user, code });
-  return { group };
+  return group;
+};
+
+export const getPositionBysGroupId = async ({
+  groupId,
+}: {
+  groupId: string;
+}) => {
+  const positions = await getBoardPositionsByGroupId(groupId);
+  return positions;
 };
 
 export const getGroupById = async (

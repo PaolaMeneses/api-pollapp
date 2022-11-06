@@ -5,6 +5,7 @@ import {
   activateBoardById,
   getBoardWithPredsByBoardId,
   getBoardByBoardId,
+  getBoardWithPreviousPredsByBoardId,
 } from "./store";
 
 export const getCurrentUserBoardsByGroup = async () => {
@@ -16,6 +17,11 @@ export const getBoardWithPreds = async (boardId: string) => {
   return board;
 };
 
+export const getBoardWithPreviousPreds = async (boardId: string) => {
+  const board = await getBoardWithPreviousPredsByBoardId(boardId);
+  return board;
+};
+
 export const getBoardActiveIfExistByBoardId = async (boardId: string) => {
   const board = await getBoardByBoardId(boardId);
   return board;
@@ -23,11 +29,11 @@ export const getBoardActiveIfExistByBoardId = async (boardId: string) => {
 
 export const createBoardInGroup = async (newBoard: Board) => {
   const board = await addBoardInGroup(newBoard);
-  return { board };
+  return board;
 };
 
 export const activateBoard = async (boardId: string) => {
   const board = await activateBoardById(boardId);
 
-  return { board };
+  return board;
 };

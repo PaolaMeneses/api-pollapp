@@ -4,17 +4,18 @@ import { User } from "../users/model";
 export class Group {
   _id: string;
 
-  @prop()
+  @prop({ required: true })
   name: string;
 
   @prop({ ref: () => User })
   owner: Ref<User>;
 
-  @prop({ default: false })
+  @prop({ default: true })
   isActive: boolean;
 
   @prop()
   code: string;
 }
 
-export default getModelForClass(Group);
+const GroupModel = getModelForClass(Group);
+export default GroupModel;

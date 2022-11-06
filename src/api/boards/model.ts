@@ -5,6 +5,8 @@ import { User } from "../users/model";
 
 @plugin(AutoIncrementID, { field: "number", startAt: 1000 })
 export class Board {
+  _id: string;
+
   @prop({ ref: () => User, required: true })
   user_id: Ref<User>;
 
@@ -19,6 +21,9 @@ export class Board {
 
   @prop({ default: null })
   previous_pos: number;
+
+  @prop({ default: 0 })
+  totalPoints: number;
 
   @prop({ default: false })
   isActive: boolean;

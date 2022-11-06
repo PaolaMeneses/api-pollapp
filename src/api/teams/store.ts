@@ -155,13 +155,16 @@ export const teamSeeder = async () => {
   ];
 
   await Promise.all(
-    teams.map(async (team) => {
-      const teamFound = await TeamModel.findOne({ name: team.name });
+    teams.map((team) => {
+      return new Promise<void>(async (resolve) => {
+        const teamFound = await TeamModel.findOne({ name: team.name });
 
-      if (!teamFound) {
-        const newTeam = new TeamModel(team);
-        await newTeam.save();
-      }
+        if (!teamFound) {
+          const newTeam = new TeamModel(team);
+          await newTeam.save();
+        }
+        resolve();
+      });
     })
   );
 };

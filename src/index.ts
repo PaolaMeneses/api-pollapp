@@ -23,7 +23,7 @@ const start = async () => {
     await server.register(cors, {});
     await databaseInit();
     server.register(routes);
-    await server.listen({ port: 3000, host: "0.0.0.0" });
+    await server.listen({ port: 0, host: "0.0.0.0" });
     console.log(server.printRoutes());
     const address = server.server.address();
     const port = typeof address === "string" ? address : address?.port;

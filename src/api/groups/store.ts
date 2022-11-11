@@ -62,7 +62,12 @@ export const getAllGroups = async () => {
 export const getBoardPositionsByGroupId = async (boardId: string) => {
   const boards = await BoardModel.aggregate([
     {
-      $match: { group_id: new mongoose.Types.ObjectId(boardId) },
+      $match: {
+        $and: [
+          { group_id: new mongoose.Types.ObjectId(boardId) },
+          { isActive: true },
+        ],
+      },
     },
     {
       $lookup: {

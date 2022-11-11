@@ -25,6 +25,12 @@ export class Board {
   @prop({ default: 0 })
   totalPoints: number;
 
+  @prop({ default: 0 })
+  predsThreePoints: number;
+
+  @prop({ default: 0 })
+  predsOnePoints: number;
+
   @prop({ default: false })
   isActive: boolean;
 }

@@ -880,46 +880,47 @@ export const updatePositionByGroup = async () => {
               previous_pos: { $first: "$previous_pos" },
               number: { $first: "$number" },
               totalPoints: { $sum: "$predictions.points" },
-              // predictions: { $push: "$predictions" },
+              predictions: { $push: "$predictions" },
             },
           },
-          { $sort: { points: -1 } },
-          // {
-          //   $project: {
-          //     _id: 1,
-          //     current_pos: 1,
-          //     previous_pos: 1,
-          //     number: 1,
-          //     predictions: {
-          //       _id: 1,
-          //       localGoalPrediction: 1,
-          //       visitorGoalPrediction: 1,
-          //       points: 1,
-          //       match: {
-          //         _id: 1,
-          //         localGoals: 1,
-          //         visitorGoals: 1,
-          //         localGeneralGoals: 1,
-          //         visitorGeneralGoals: 1,
-          //         date: 1,
-          //         isActive: 1,
-          //         isClosed: 1,
-          //         phase: 1,
-          //         matchNumber: 1,
-          //         localTeam: {
-          //           _id: 1,
-          //           name: 1,
-          //           flag: 1,
-          //         },
-          //         visitorTeam: {
-          //           _id: 1,
-          //           name: 1,
-          //           flag: 1,
-          //         },
-          //       },
-          //     },
-          //   },
-          // },
+          {
+            $project: {
+              _id: 1,
+              current_pos: 1,
+              previous_pos: 1,
+              number: 1,
+              totalPoints: 1,
+              predsThreePoints: {
+                $size: {
+                  $filter: {
+                    input: "$predictions",
+                    as: "predictions",
+                    cond: {
+                      $and: [{ $eq: ["$$predictions.points", 3] }],
+                    },
+                  },
+                },
+              },
+              predsOnePoints: {
+                $size: {
+                  $filter: {
+                    input: "$predictions",
+                    as: "predictions",
+                    cond: {
+                      $and: [{ $eq: ["$$predictions.points", 1] }],
+                    },
+                  },
+                },
+              },
+            },
+          },
+          {
+            $sort: {
+              totalPoints: -1,
+              predsThreePoints: -1,
+              predsOnePoints: -1,
+            },
+          },
         ]);
         await Promise.all(
           boards.map((board, i) => {
@@ -927,6 +928,8 @@ export const updatePositionByGroup = async () => {
               await BoardModel.findByIdAndUpdate(board._id, {
                 totalPoints: board.totalPoints,
                 current_pos: i + 1,
+                predsThreePoints: board.predsThreePoints,
+                predsOnePoints: board.predsOnePoints,
                 previous_pos: board.current_pos,
               });
               resolve();

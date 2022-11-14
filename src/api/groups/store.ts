@@ -276,7 +276,17 @@ export const findGroupListByUser = async (user: User) => {
           $filter: {
             input: "$boards",
             as: "boards",
-            cond: { $eq: ["$$boards.isActive", true] },
+            cond: {
+              $and: [
+                { $eq: ["$$boards.isActive", true] },
+                {
+                  $eq: [
+                    "$$boards.user_id",
+                    new mongoose.Types.ObjectId(user._id),
+                  ],
+                },
+              ],
+            },
           },
         },
         pending: {
@@ -284,7 +294,17 @@ export const findGroupListByUser = async (user: User) => {
             $filter: {
               input: "$boards",
               as: "boards",
-              cond: { $eq: ["$$boards.isActive", false] },
+              cond: {
+                $and: [
+                  { $eq: ["$$boards.isActive", false] },
+                  {
+                    $eq: [
+                      "$$boards.user_id",
+                      new mongoose.Types.ObjectId(user._id),
+                    ],
+                  },
+                ],
+              },
             },
           },
         },

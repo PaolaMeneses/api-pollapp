@@ -1,7 +1,11 @@
+import dayjs from "dayjs";
+import createHttpError from "http-errors";
+
 import {
   getAllPredictionsByBoard,
   addPredictionInBoard,
   updatePredictionById,
+  findPredictionWithMatchById,
 } from "./store";
 
 export const getUserAuthPredictionListByBoard = async () => {
@@ -20,6 +24,13 @@ export const updatePredictById = async (
     visitorGoalPrediction: number;
   }
 ) => {
+  const currentPred = await findPredictionWithMatchById(predictId);
+  if (dayjs().unix() >= dayjs(currentPred.match.date).unix()) {
+    throw new createHttpError.BadRequest(
+      "Ya no se pueden hacer predicciones a este partido"
+    );
+  }
+
   const prediction = await updatePredictionById(predictId, newPrediction);
   return prediction;
 };

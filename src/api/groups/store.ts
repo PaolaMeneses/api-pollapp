@@ -81,6 +81,7 @@ export const getBoardPositionsByGroupId = async (boardId: string) => {
       $unwind: "$user",
     },
     { $unset: "user.password" },
+    { $sort: { current_pos: 1 } },
   ]);
 
   return boards;

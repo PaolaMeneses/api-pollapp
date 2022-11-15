@@ -170,7 +170,10 @@ export const findGroupListByCode = async (code: string, user: User) => {
       },
     },
     {
-      $unwind: "$owner",
+      $unwind: {
+        path: "$owner",
+        preserveNullAndEmptyArrays: true,
+      },
     },
     {
       $lookup: {
@@ -262,7 +265,10 @@ export const findGroupListByUser = async (user: User) => {
       },
     },
     {
-      $unwind: "$owner",
+      $unwind: {
+        path: "$owner",
+        preserveNullAndEmptyArrays: true,
+      },
     },
     {
       $project: {

@@ -19,6 +19,9 @@ export class User {
 
   @prop()
   password: string;
+
+  @prop({ default: false })
+  isAdmin: boolean;
 }
 
 const userModel = getModelForClass(User);

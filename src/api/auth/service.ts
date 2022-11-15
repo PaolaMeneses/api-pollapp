@@ -7,7 +7,7 @@ import { User } from "../users/model";
 import { createUser, findOneUserByEmail } from "./store";
 
 export const login = async (auth: User) => {
-  const userFound = await findOneUserByEmail(auth.email);
+  const userFound = await findOneUserByEmail(auth.email.toLowerCase());
   if (!userFound) {
     throw new createError.BadRequest("Usuario no existe");
   }
@@ -32,14 +32,18 @@ export const login = async (auth: User) => {
 };
 
 export const registerUser = async (newUser: User) => {
-  const userFound = await findOneUserByEmail(newUser.email);
+  const userFound = await findOneUserByEmail(newUser.email.toLowerCase());
   if (userFound) {
     throw new createError.BadRequest("Usuario ya existe");
   }
 
   const password = await hashText(newUser.password);
 
-  await createUser({ ...newUser, password });
+  await createUser({
+    ...newUser,
+    password,
+    email: newUser.email.toLowerCase(),
+  });
   const auth = await login({ ...newUser });
   return auth;
 };

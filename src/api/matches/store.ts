@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import mongoose from "mongoose";
 import BoardModel, { Board } from "../boards/model";
 import GroupModel from "../groups/model";
@@ -762,6 +763,7 @@ export const matchSeeder = async () => {
           });
           const newMatch = new MatchModel({
             ...match,
+            date: dayjs(match.date),
             localTeam_id,
             visitorTeam_id,
           });

@@ -26,7 +26,6 @@ export const login = async (auth: User) => {
     user: userAuth,
     expires_at: dayjs().add(1, "days").unix(),
   };
-  console.log(bodyToken);
   const token = createToken(bodyToken);
   return { token, ...bodyToken };
 };

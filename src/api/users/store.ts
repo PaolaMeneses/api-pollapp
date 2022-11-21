@@ -8,6 +8,5 @@ export const createUser = async () => {
     password: "password",
   });
   await user.save();
-  console.log({ user });
   return user;
 };

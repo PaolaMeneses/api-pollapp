@@ -22,7 +22,6 @@ export const getBoardsByUserAndGroup = async () => {
       $match: { code: "AXc12112" },
     },
   ]);
-  console.log({ board });
   return board;
 };
 
@@ -318,7 +317,6 @@ export const activateBoardById = async (boardId: string) => {
 
     return board;
   } catch (error) {
-    console.log("error.message :>> ", (error as Error).message);
     throw new createHttpError.BadRequest("Error activando tabla");
   }
 };

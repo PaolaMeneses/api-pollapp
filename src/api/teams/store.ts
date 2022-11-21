@@ -2,7 +2,6 @@ import TeamModel from "./model";
 
 export const getAllTeams = async () => {
   const team = await TeamModel.aggregate();
-  console.log({ team });
   return team;
 };
 
@@ -14,7 +13,6 @@ export const addTeam = async () => {
     code: "AXc12112",
   });
   await team.save();
-  console.log({ team });
   return team;
 };
 

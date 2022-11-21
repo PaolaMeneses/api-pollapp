@@ -1,3 +1,4 @@
+import { verifyToken } from "./../../middlewares";
 import { FastifyPluginCallback, RouteOptions } from "fastify";
 import {
   getUserAuthPredictionListByBoard,
@@ -13,16 +14,29 @@ const routes: RouteOptions[] = [
   {
     url: "/",
     method: "GET",
+    preHandler: [verifyToken],
     handler: getUserAuthPredictionListByBoard,
   },
   {
     url: "/",
     method: "POST",
+    preHandler: [verifyToken],
     handler: createPredictioInBoard,
   },
   {
     url: "/:predictId",
     method: "PATCH",
+    preHandler: [verifyToken],
+    schema: {
+      body: {
+        type: "object",
+        required: ["localGoalPrediction", "visitorGoalPrediction"],
+        properties: {
+          localGoalPrediction: { type: "number" },
+          visitorGoalPrediction: { type: "number" },
+        },
+      },
+    },
     handler: async (request) => {
       const { predictId } = request.params as { predictId: string };
       const newPrediction = request.body as {

@@ -18,7 +18,6 @@ export const getAllPredictionsByBoard = async () => {
       $match: { code: "AXc12112" },
     },
   ]);
-  console.log({ prediction });
   return prediction;
 };
 
@@ -30,7 +29,6 @@ export const addPredictionInBoard = async () => {
     code: "AXc12112",
   });
   await prediction.save();
-  console.log({ prediction });
   return prediction;
 };
 

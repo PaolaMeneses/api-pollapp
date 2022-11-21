@@ -25,6 +25,9 @@ export const updatePredictById = async (
   }
 ) => {
   const currentPred = await findPredictionWithMatchById(predictId);
+  if (!("_id" in currentPred)) {
+    throw new createHttpError.NotFound("no sé encontró predicción");
+  }
   if (dayjs().unix() >= dayjs(currentPred.match.date).unix()) {
     throw new createHttpError.BadRequest(
       "Ya no se pueden hacer predicciones a este partido"

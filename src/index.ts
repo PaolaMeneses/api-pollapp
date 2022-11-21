@@ -25,7 +25,7 @@ const start = async () => {
     await databaseInit();
     server.register(routes);
     await server.listen({ port: PORT, host: "0.0.0.0" });
-    console.log(server.printRoutes());
+    //console.log(server.printRoutes());
     const address = server.server.address();
     const port = typeof address === "string" ? address : address?.port;
     console.log({ port, address });

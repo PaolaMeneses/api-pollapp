@@ -155,7 +155,6 @@ export const addMatch = async () => {
     code: "AXc12112",
   });
   await match.save();
-  console.log({ match });
   return match;
 };
 

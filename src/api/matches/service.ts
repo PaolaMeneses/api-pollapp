@@ -37,3 +37,8 @@ export const closeMatch = async (matchId: string, newMatch: Match) => {
   const match = await updatePositionByGroup();
   return match;
 };
+
+export const updateMatch = async (matchId: string, newMatch: Match) => {
+  await updateMatchById(matchId, newMatch);
+  return "actualizado con exito";
+};

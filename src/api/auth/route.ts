@@ -1,7 +1,7 @@
 import { verifyToken } from "./../../middlewares";
 import { FastifyPluginCallback, RouteOptions } from "fastify";
 import { User } from "../users/model";
-import { login, registerUser } from "./service";
+import { login, passwordRecovery, registerUser } from "./service";
 
 // const opts: RouteShorthandOptions = {
 //   schema: {},
@@ -14,6 +14,14 @@ const routes: RouteOptions[] = [
     preHandler: [verifyToken],
     handler: async (request) => {
       const data = request.auth.user;
+      return { data };
+    },
+  },
+  {
+    url: "/password-recovery",
+    method: "POST",
+    handler: async (request) => {
+      const data = await passwordRecovery(request.body as User);
       return { data };
     },
   },

@@ -12,14 +12,12 @@ export const getMatchWithTeams = async () => {
       $match: {
         $and: [
           {
-            isActive: true,
-          },
-          {
             isClosed: false,
           },
         ],
       },
     },
+    { $sort: { matchNumber: 1 } },
     {
       $lookup: {
         from: "teams",
@@ -777,7 +775,7 @@ export const matchSeeder = async () => {
 export const updateMatchById = async (matchId: string, newMatch: Match) => {
   const match = await MatchModel.findOneAndUpdate(
     { _id: new mongoose.Types.ObjectId(matchId) },
-    newMatch,
+    { $set: newMatch },
     { new: true }
   );
 

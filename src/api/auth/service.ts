@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import { comparePassword, createToken, hashText } from "../../utils";
 
 import { User } from "../users/model";
-import { createUser, findOneUserByEmail } from "./store";
+import { createUser, findOneUserByEmail, updateUser } from "./store";
 
 export const login = async (auth: User) => {
   const userFound = await findOneUserByEmail(auth.email.toLowerCase());
@@ -28,6 +28,19 @@ export const login = async (auth: User) => {
   };
   const token = createToken(bodyToken);
   return { token, ...bodyToken };
+};
+
+export const passwordRecovery = async (newUser: User) => {
+  const userFound = await findOneUserByEmail(newUser.email.toLowerCase());
+  if (!userFound) {
+    throw new createError.BadRequest("Usuario no existe");
+  }
+  const password = await hashText(newUser.password);
+
+  userFound.password = password;
+  await updateUser(userFound);
+
+  return "Contraseña actualizada";
 };
 
 export const registerUser = async (newUser: User) => {

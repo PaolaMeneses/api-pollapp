@@ -1,8 +1,8 @@
 import TeamModel from "./model";
 
 export const getAllTeams = async () => {
-  const team = await TeamModel.aggregate();
-  return team;
+  const teams = await TeamModel.find();
+  return teams;
 };
 
 export const addTeam = async () => {

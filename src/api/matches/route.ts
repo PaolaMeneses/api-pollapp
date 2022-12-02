@@ -7,6 +7,7 @@ import {
   closeMatch,
   predictionListByMatchId,
   matchById,
+  updateMatch,
 } from "./service";
 
 // const opts: RouteShorthandOptions = {
@@ -61,6 +62,17 @@ const routes: RouteOptions[] = [
       const newMatch = request.body as Match;
 
       const data = await closeMatch(matchId, newMatch);
+      return { data };
+    },
+  },
+  {
+    url: "/:matchId",
+    method: "PATCH",
+    handler: async (request) => {
+      const { matchId } = request.params as { matchId: string };
+      const newMatch = request.body as Match;
+
+      const data = await updateMatch(matchId, newMatch);
       return { data };
     },
   },
